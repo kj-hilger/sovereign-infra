@@ -1,4 +1,4 @@
-# 🧠 Sovereign Infra
+# 🏗️ Sovereign Infra
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/kj-hilger/sovereign-agentic-orchestration-stack/main/docs/architecture/target_architecture.png" alt="Target Architecture Diagram" width="100%">
