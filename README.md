@@ -51,6 +51,36 @@ chmod +x install-x64-laptop.sh
 ### ⚠️ Critical Constraints
 * GPU Acceleration: Requires NVIDIA CUDA toolkit installation prior to cluster bootstrap.
 
+## 🏗️ Hardware Architecture: Sovereign-Edge-Node
+
+To achieve full digital sovereignty and air-gapped autonomy for the **Sovereign-Agentic-Orchestration-Stack**, the following hardware specification is utilized. This setup is optimized for mobile field-testing and local AI inference.
+
+### 💻 Core Compute Module
+* **Processor:** NVIDIA Jetson Orin Nano Super Developer Kit (67 TOPS AI Performance).
+* **Memory:** 8GB 128-bit LPDDR5 (Unified Memory Architecture).
+* **Networking:** Air-Gapped by design (No WAN/Cloud dependency).
+* **Cooling:** Active PWM-Fan (Mandatory for concurrent VGG16 & Ollama workloads).
+* **Power:** CR1220 Battery for local RTC timestamp persistence in air-gapped environments.
+
+### 🔋 Mobile Power Solution
+* **Power Source:** High-Capacity Powerbank (USB-C PD 3.0 / 45W+ recommended).
+    * *Purpose:* Sustaining high-peak AI inference loads.
+    * *Connectivity:* DC-Jack or USB-C Power Delivery to ensure stable voltage for the Orin Nano.
+    * *Mobility:* Enables 100% untethered operation.
+
+### 👁️ Vision & Feedback Layer
+* **Sensor:** Waveshare IMX219-170 (8MP, 170° Ultra-Wide FOV).
+    * *Purpose:* High-resolution group capture and individual cropping for Re-ID.
+    * *Interface:* 15-pin FFC (CSI-Port).
+* **Interaction:** 2.42" OLED Display (128×64, SPI/I2C).
+    * *Purpose:* Real-time agent status and "Walking-Guide" instructions from Camunda.
+
+### ⚡ Performance & Storage
+* **Primary Storage:** WD_BLACK™ SN770 250GB NVMe SSD (Gen4, 4000 MB/s Read).
+    * *Role:* Critical for high-speed **Swap-File** performance and local image database.
+* **Enclosure:** KKSB Jetson Orin Nano Case (Steel, optimized for thermal dissipation and rail-mounting).
+
+---
 
 ## 📊 Memory Budget Planning (Edge AI / 8GB)
 
@@ -60,17 +90,18 @@ To run the **Sovereign-Agentic-Orchestration-Stack** on a Jetson Orin Nano (8GB)
 | :--- | :--- | :--- |
 | **K3s & OS Base** | 1.0 - 1.2 GB | Disabled Traefik, Service-LB, and local-storage. |
 | **ArgoCD (Core)** | 0.4 - 0.6 GB | Running in **Core Mode** (no UI/Redis/Dex). |
-| **Camunda 8 (BPMN)** | 2.5 - 3.0 GB | Tuned JVM Heap (`Xmx2G`) and disabled Web Modeler. |
-| **AI Engine (Ollama)** | 3.2 - 3.5 GB | Limited to **4-bit Quantized Models** (Phi-3, Mistral q4). |
+| **Camunda 8 (BPMN)**| 2.0 - 2.5 GB | Tuned JVM Heap (`Xmx1.5G`), Task-Workers limited. |
+| **VGG16 Classifier**| 0.5 - 0.8 GB | **TensorRT** optimization for edge-specific inference. |
+| **AI Engine (Ollama)**| 3.0 - 3.5 GB | Limited to **4-bit Quantized Models** (Phi-3, Moondream2). |
 
 ### 🛠️ Critical Performance Tuning
-* **NVMe Swap:** A 4GB+ Swapfile on NVMe is mandatory to prevent OOM (Out-of-Memory) crashes during peak orchestration loads.
-* **Z-RAM:** Enabled by default in the bootstrap script to compress memory pages.
-* **Model Selection:** recommend is `phi3:mini` (2.2GB) or `mistral:7b-instruct-v0.2-q4_K_M` (4.1GB - borderline).
+* **NVMe Swap:** A 6GB+ Swapfile on the **WD_BLACK SN770** is mandatory. The high IOPS and PCIe Gen4 speed minimize latency during memory pressure.
+* **TensorRT Engine:** Pre-compiling the VGG16 model into a TensorRT engine is required to fit the identification task alongside the Camunda/Ollama stack.
+* **Power Management:** Use `nvpmodel -m 0` (MAXN mode) only when connected to the 45W Powerbank to ensure the CPU/GPU don't throttle during identification.
+* **Visual Feedback:** The 2.42" OLED display provides critical "OOM-Warnings" before the Linux OOM-Killer terminates K3s pods.
 
 > [!CAUTION]
-> Concurrent execution of complex BPMN workflows and heavy LLM inference can saturate the 8GB limit. Monitor via `jtop` or `kubectl top nodes`.
-> 
+> Running the 170° camera stream at full resolution (8MP) while Ollama is inferencing will hit the bandwidth limit of the memory bus. Use lower-resolution streams for motion detection and trigger high-res snapshots only for identification.
 
 ---
 
