@@ -12,11 +12,11 @@
 
 ## ⚙️ Resource-Aware Deployment Environments
 
-| Environment | Specs (Tested) | Infrastructure Focus                                                       |
-| :--- | :--- |:---------------------------------------------------------------------------|
-| **High-Power Desktop** | 64 GB RAM / 16 GB VRAM (RTX) | Full utilization for Heavy Load Testing, Large LLMs, Minikube with Web UI. |
-| **Edge AI (Jetson)** | 16 GB Unified Memory (Orin Nano) | Strict RAM limits, Core Mode ArgoCD, Optimized Java Heap, K3s.             |
-| **Minimal / Laptop** | 16 GB RAM (CPU only) | Resource pooling for Proof of Concept & Local Testing, K3s.                |
+| Environment | Specs (Tested)                  | Infrastructure Focus                                                       |
+| :--- |:--------------------------------|:---------------------------------------------------------------------------|
+| **High-Power Desktop** | 64 GB RAM / 16 GB VRAM (RTX)    | Full utilization for Heavy Load Testing, Large LLMs, Minikube with Web UI. |
+| **Edge AI (Jetson)** | 8 GB Unified Memory (Orin Nano) | Strict RAM limits, Core Mode ArgoCD, Optimized Java Heap, K3s.             |
+| **Minimal / Laptop** | 16 GB RAM (CPU only)            | Resource pooling for Proof of Concept & Local Testing, K3s.                |
 
 ## 🚀 Installation (Bootstrap)
 
@@ -50,6 +50,27 @@ chmod +x install-x64-laptop.sh
 
 ### ⚠️ Critical Constraints
 * GPU Acceleration: Requires NVIDIA CUDA toolkit installation prior to cluster bootstrap.
+
+
+## 📊 Memory Budget Planning (Edge AI / 8GB)
+
+To run the **Sovereign-Agentic-Orchestration-Stack** on a Jetson Orin Nano (8GB), strict memory limits are applied. Because of the **Unified Memory** architecture, CPU and GPU share the same 8GB pool.
+
+| Component | Est. RAM Usage | Optimization Strategy |
+| :--- | :--- | :--- |
+| **K3s & OS Base** | 1.0 - 1.2 GB | Disabled Traefik, Service-LB, and local-storage. |
+| **ArgoCD (Core)** | 0.4 - 0.6 GB | Running in **Core Mode** (no UI/Redis/Dex). |
+| **Camunda 8 (BPMN)** | 2.5 - 3.0 GB | Tuned JVM Heap (`Xmx2G`) and disabled Web Modeler. |
+| **AI Engine (Ollama)** | 3.2 - 3.5 GB | Limited to **4-bit Quantized Models** (Phi-3, Mistral q4). |
+
+### 🛠️ Critical Performance Tuning
+* **NVMe Swap:** A 4GB+ Swapfile on NVMe is mandatory to prevent OOM (Out-of-Memory) crashes during peak orchestration loads.
+* **Z-RAM:** Enabled by default in the bootstrap script to compress memory pages.
+* **Model Selection:** recommend is `phi3:mini` (2.2GB) or `mistral:7b-instruct-v0.2-q4_K_M` (4.1GB - borderline).
+
+> [!CAUTION]
+> Concurrent execution of complex BPMN workflows and heavy LLM inference can saturate the 8GB limit. Monitor via `jtop` or `kubectl top nodes`.
+> 
 
 ---
 
