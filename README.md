@@ -37,6 +37,9 @@ chmod +x install-x64-desktop.sh
 ./install-x64-desktop.sh
 ```
 
+🚧 Status: Planned
+
+
 ### Jetson / ARM64 (Edge Devices)
 
 <img src="docs/sovereign-infra-jetson.jpg" width="400">
@@ -59,11 +62,16 @@ chmod +x install-arm64-k3s.sh
 ./install-arm64-k3s.sh
 ```
 
+🚀 Status: Tested
+
+
 ### x86_64 (Laptop)
 ```bash
 chmod +x install-x64-laptop.sh
 ./install-x64-laptop.sh
 ```
+
+🚧 Status: Planned
 
 ## 📄 License
 
