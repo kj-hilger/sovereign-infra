@@ -18,12 +18,13 @@
 | **Edge AI (Jetson)** | 8 GB Unified Memory (Orin Nano) | Strict RAM limits, Core Mode ArgoCD, Optimized Java Heap, K3s.             |
 | **Minimal / Laptop** | 16 GB RAM (CPU only)            | Resource pooling for Proof of Concept & Local Testing, K3s.                |
 
-### 🔧 Infrastructure Guarantees
+### Infrastructure Guarantees
 * Sovereignty: Local Kubernetes & RDBMS (PostgreSQL) without cloud leaks.
 * Hardware Efficiency: Adaptive resource profiling (CPU/GPU/RAM) based on the selected bootstrap profile.
 
-### ⚠️ Critical Constraints
+### Critical Constraints
 * GPU Acceleration: Requires NVIDIA CUDA toolkit installation prior to cluster bootstrap.
+
 
 ## 🚀 Installation (Bootstrap)
 
